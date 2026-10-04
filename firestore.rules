@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(docId) {
+      return docId is string && docId.size() > 0 && docId.size() <= 128;
+    }
+
+    // Health check endpoint for connection verification
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // User profile document and strictly isolated subcollections
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false; // Disallow raw deletion of profile records
+
+      // User's private shipments subcollection
+      match /shipments/{shipmentId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(shipmentId);
+        allow update: if isOwner(userId) && isValidId(shipmentId);
+        allow delete: if isOwner(userId);
+      }
+
+      // User's private pickup requests subcollection
+      match /pickups/{pickupId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(pickupId);
+        allow update: if isOwner(userId) && isValidId(pickupId);
+        allow delete: if isOwner(userId);
+      }
+
+      // User's private client / address book contacts
+      match /clients/{clientId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(clientId);
+        allow update: if isOwner(userId) && isValidId(clientId);
+        allow delete: if isOwner(userId);
+      }
+
+      // User's private orders / logistics records
+      match /orders/{orderId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(orderId);
+        allow update: if isOwner(userId) && isValidId(orderId);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

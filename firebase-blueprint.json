@@ -1,0 +1,162 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Private account profile, contact details, role, and organization information for a registered user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The unique Firebase Auth UID" },
+        "email": { "type": "string", "description": "User corporate email address" },
+        "displayName": { "type": "string", "description": "User full name" },
+        "company": { "type": "string", "description": "Company or organization name" },
+        "phone": { "type": "string", "description": "Contact phone number" },
+        "role": { "type": "string", "enum": ["Customer", "Dealer Operations"], "description": "User dashboard role" },
+        "organization": { "type": "string", "description": "Enterprise organization identifier or name" },
+        "address": { "type": "string", "description": "Physical headquarters or branch address" },
+        "defaultHub": { "type": "string", "description": "Preferred logistics gateway or terminal" },
+        "createdAt": { "type": "string", "description": "Account registration ISO timestamp" },
+        "updatedAt": { "type": "string", "description": "Profile last updated ISO timestamp" }
+      },
+      "required": ["userId", "email", "displayName"]
+    },
+    "Shipment": {
+      "title": "User Shipment",
+      "description": "Private shipment record owned and accessible strictly by the authenticated user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique shipment identifier" },
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "referenceNumber": { "type": "string", "description": "Shipment unique reference number or waybill" },
+        "trackingNumber": { "type": "string", "description": "Waybill or tracking code" },
+        "customer": { "type": "string", "description": "Customer/client name" },
+        "origin": { "type": "string", "description": "Origin city, terminal, or port" },
+        "destination": { "type": "string", "description": "Destination city, gateway, or delivery location" },
+        "shipmentDate": { "type": "string", "description": "Date booked or dispatched" },
+        "expectedDeliveryDate": { "type": "string", "description": "Expected or estimated delivery date" },
+        "status": {
+          "type": "string",
+          "enum": ["Pending", "Processing", "In Transit", "Delivered", "Cancelled"],
+          "description": "Logistics workflow status"
+        },
+        "cargoInfo": { "type": "string", "description": "Cargo description, commodity category, or specifications" },
+        "quantity": { "type": "number", "description": "Quantity of packages, pallets, or cartons" },
+        "weight": { "type": "string", "description": "Gross cargo weight" },
+        "notes": { "type": "string", "description": "Handling notes, customs instructions, or special requests" },
+        "mode": { "type": "string", "enum": ["Ocean", "Air", "Road"], "description": "Transport mode" },
+        "carrier": { "type": "string", "description": "Assigned logistics carrier" },
+        "currentLocation": { "type": "string", "description": "Latest telematics or checkpoint location" },
+        "recipientPhone": { "type": "string", "description": "Delivery contact phone" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last updated timestamp" }
+      },
+      "required": ["id", "userId", "referenceNumber", "customer", "origin", "destination", "status"]
+    },
+    "PickupRequest": {
+      "title": "Pickup Request",
+      "description": "Private scheduled doorstep or warehouse cargo pickup request",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique pickup request identifier" },
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "trackingNumber": { "type": "string", "description": "Associated shipment tracking number" },
+        "pickupAddress": { "type": "string", "description": "Pickup warehouse or dock address" },
+        "pickupDate": { "type": "string", "description": "Scheduled pickup date" },
+        "timeSlot": { "type": "string", "description": "Scheduled time window" },
+        "packageCount": { "type": "number", "description": "Number of parcels or pallets" },
+        "cargoType": { "type": "string", "description": "Cargo classification description" },
+        "status": {
+          "type": "string",
+          "enum": ["Scheduled", "Assigned", "En Route", "Completed", "Cancelled"],
+          "description": "Pickup status"
+        },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["id", "userId", "pickupAddress", "pickupDate", "status"]
+    },
+    "LogisticsClient": {
+      "title": "Logistics Client",
+      "description": "Private consignor or consignee client record managed by the user. A client can have multiple associated orders and shipments.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Client unique identifier" },
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "company": { "type": "string", "description": "Company or client name" },
+        "contactPerson": { "type": "string", "description": "Primary contact person name" },
+        "email": { "type": "string", "description": "Client corporate email" },
+        "phone": { "type": "string", "description": "Client phone number" },
+        "address": { "type": "string", "description": "Client physical or registered address" },
+        "notes": { "type": "string", "description": "Client notes and preferences" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" }
+      },
+      "required": ["id", "userId", "company", "contactPerson", "email"]
+    },
+    "LogisticsOrder": {
+      "title": "Logistics Order",
+      "description": "Commercial freight or purchase order placed by or on behalf of a client, associated with a client and shipment.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Order unique identifier" },
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "orderNumber": { "type": "string", "description": "Unique commercial order reference number (e.g. ORD-2026-XXXXXX)" },
+        "clientId": { "type": "string", "description": "Reference to the associated Client record (Client relationship)" },
+        "clientName": { "type": "string", "description": "Company name of the associated client" },
+        "clientContact": { "type": "string", "description": "Contact person of the associated client" },
+        "shipmentId": { "type": "string", "description": "Reference to the associated Shipment record (Shipment relationship)" },
+        "shipmentReference": { "type": "string", "description": "Reference number or waybill of the associated shipment" },
+        "title": { "type": "string", "description": "Order title or description of goods" },
+        "status": {
+          "type": "string",
+          "enum": ["Draft", "Confirmed", "In Fulfillment", "Shipped", "Delivered", "Cancelled"],
+          "description": "Commercial order lifecycle status"
+        },
+        "orderDate": { "type": "string", "description": "Order booking or creation date" },
+        "deliveryDeadline": { "type": "string", "description": "Target delivery deadline" },
+        "totalAmount": { "type": "number", "description": "Total order valuation" },
+        "currency": { "type": "string", "description": "Valuation currency code (USD, TZS, EUR)" },
+        "origin": { "type": "string", "description": "Order pickup or shipping origin" },
+        "destination": { "type": "string", "description": "Order final destination address" },
+        "notes": { "type": "string", "description": "Fulfillment specifications and commercial terms" },
+        "items": {
+          "type": "array",
+          "description": "Line items in the order",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" },
+              "quantity": { "type": "number" },
+              "unitPrice": { "type": "number" },
+              "weight": { "type": "string" }
+            }
+          }
+        },
+        "createdAt": { "type": "string", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last updated timestamp" }
+      },
+      "required": ["id", "userId", "orderNumber", "clientId", "clientName", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile storing private profile, account settings, and organization info for the owner"
+    },
+    "/users/{userId}/shipments/{shipmentId}": {
+      "schema": "Shipment",
+      "description": "Private shipments belonging exclusively to the authenticated user account, having multiple tracking events and linked to a client and order"
+    },
+    "/users/{userId}/pickups/{pickupId}": {
+      "schema": "PickupRequest",
+      "description": "Private scheduled pickup requests belonging strictly to the user account"
+    },
+    "/users/{userId}/clients/{clientId}": {
+      "schema": "LogisticsClient",
+      "description": "Private client address book records belonging strictly to the user account, associated with multiple orders"
+    },
+    "/users/{userId}/orders/{orderId}": {
+      "schema": "LogisticsOrder",
+      "description": "Private commercial logistics orders associated with a client and shipment"
+    }
+  }
+}
